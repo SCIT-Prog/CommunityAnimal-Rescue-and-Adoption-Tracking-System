@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% from '_m.html' import fields %}{% block head %}{% include '_leaflet.html' %}{% endblock %}{% block body %}
+<section class="band alert"><h1>{{ icon('alert',18) }} Found a stray or hurt animal?</h1><p>Take a picture, drop a pin where it is and press send. The rescue center sees your report on the staff map right away so a rescuer can go and help.</p>{% if svc %}<p class="mut" style="margin:.4em 0 0">{{ icon('map',16) }} We accept requests from these places only: <b>{{ svc }}</b>.</p>{% endif %}</section>
+{% if closed %}<div class="card"><h2 style="margin-top:0">{{ icon('alert',18) }} Online requests are closed right now</h2><p>The rescue center is not taking online requests at the moment. Please contact the center directly.</p><a class="btn alt" href="{{ url_for('home') }}">Back to home</a></div>{% else %}
+<form class="card" method="post" enctype="multipart/form-data"><div class="hp" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div>
+{{ fields(fs, vals, csrf) }}
+{% include '_picker.html' %}
+<p class="mut">Stay safe: do not chase or corner a scared or injured animal. Keep your distance and, if you can, stay nearby until help arrives.</p>
+<button>Send report to the rescue center</button> <a class="btn alt" href="{{ url_for('home') }}">Cancel</a></form>{% endif %}{% endblock %}
+{% block scripts %}<script src="{{ url_for('static',filename='map.js') }}"></script>{% endblock %}

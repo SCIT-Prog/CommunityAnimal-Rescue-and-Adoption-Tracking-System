@@ -1,0 +1,9 @@
+{% extends 'staff_base.html' %}{% block head %}{% include '_leaflet.html' %}{% endblock %}{% block body %}
+<div class="page-head"><div><div class="eyebrow">Staff only</div><h1>Rescue map</h1><p class="sub">{{ pts|length }} report{{ 's' if pts|length!=1 }} pinned</p></div></div>
+<form class="row card" method="get"><div><label for="cs">Case</label><select id="cs" name="cs"><option value="">All</option><option value="open" {{ 'selected' if args.get('cs')=='open' }}>Open (new + responding)</option>{% for v in ['new','responding','rescued','closed'] %}<option {{ 'selected' if args.get('cs')==v }}>{{ v }}</option>{% endfor %}</select></div>
+<div><label for="c">Condition</label><select id="c" name="c"><option value="">All</option>{% for v in ['critical','injured','sick','healthy'] %}<option {{ 'selected' if args.get('c')==v }}>{{ v }}</option>{% endfor %}</select></div><div><button>{{ icon('filter',16) }} Filter</button></div></form>
+<div class="mapwrap"><div id="casemap" class="bigmap tall" role="application" aria-label="Map of rescue reports"></div><aside class="maplist card" id="caselist" aria-label="Cases on the map"><b>Cases</b></aside></div>
+<p class="legend"><span class="dotl" style="background:#b3261e"></span>critical <span class="dotl" style="background:#d97706"></span>injured <span class="dotl" style="background:#7c3aed"></span>sick <span class="dotl" style="background:#15803d"></span>healthy · bigger ring = new / not yet rescued</p>
+{% if nopin %}<p class="mut">{{ nopin }} report{{ 's' if nopin!=1 }} have no map pin (only a typed location) and are not shown.</p>{% endif %}
+<script id="ptsdata" type="application/json">{{ pts|tojson }}</script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static',filename='map.js') }}"></script><script>window.addEventListener('load',function(){if(window.RescueMap)RescueMap.cases('casemap',JSON.parse(document.getElementById('ptsdata').textContent),'caselist')});</script>{% endblock %}

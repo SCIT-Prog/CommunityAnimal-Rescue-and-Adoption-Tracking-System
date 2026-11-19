@@ -1,0 +1,15 @@
+{% extends 'staff_base.html' %}{% block body %}
+<div class="page-head"><div><h1>Email settings</h1><p class="sub">Connect a Gmail account so the system can email applicants when staff approve or decline, and alert you when someone sends a new request.</p></div></div>
+<div class="card" style="max-width:900px"><h2>How to get a Gmail App Password</h2>
+<ol style="margin:.4em 0 0;padding-left:1.2em;line-height:1.8"><li>Open your Google Account, then <b>Security</b>.</li><li>Turn on <b>2-Step Verification</b> (required by Google).</li><li>Search for <b>App passwords</b>, create one named “Rescue System”.</li><li>Copy the 16 letters Google shows and paste them below. Do <b>not</b> use your normal Gmail password.</li></ol></div>
+<form class="card" method="post" style="max-width:900px"><input type="hidden" name="_csrf" value="{{ csrf }}">
+<p class="flash {{ '' if live else 'err' }}" style="margin-top:0">{{ icon('check' if live else 'info',18) }}<span>{% if live %}Email is <b>ON</b>. Messages are sent through {{ 'Gmail' if m.gmail else 'your MAIL_* server settings' }}.{% else %}Email is <b>OFF</b> until you save a Gmail address and App Password. Messages are still saved in the Email log.{% endif %}</span></p>
+<div class="fgrid">
+<div class="fld"><label for="gmail">Gmail address</label><input id="gmail" name="gmail" type="email" value="{{ m.gmail or '' }}" placeholder="yourshelter@gmail.com" autocomplete="off"></div>
+<div class="fld"><label for="app_password">App Password {% if has_pw %}<span class="tag t-available">saved</span>{% endif %}</label><input id="app_password" name="app_password" type="password" placeholder="{{ 'Leave blank to keep the saved one' if has_pw else 'xxxx xxxx xxxx xxxx' }}" autocomplete="new-password"></div>
+<div class="fld"><label for="from_name">Sender name shown to people</label><input id="from_name" name="from_name" value="{{ m.from_name or 'Animal Rescue' }}" maxlength="80"></div>
+<div class="fld"><label for="notify_email">Send staff alerts to</label><input id="notify_email" name="notify_email" type="email" value="{{ m.notify_email or m.gmail or '' }}" placeholder="admin@example.com"></div></div>
+<label class="chk"><input type="checkbox" name="alerts" value="1" {{ 'checked' if m.get('alerts', True) }}> Email me when the public sends an adoption application, rescue report, rehome request, volunteer/foster application or pledge</label>
+<div class="fld" style="margin-top:16px;max-width:420px"><label for="test_to">Send the test email to</label><input id="test_to" name="test_to" type="email" value="{{ m.gmail or '' }}" placeholder="any email address"></div>
+<div class="actions" style="margin-top:14px"><button name="act" value="save">{{ icon('check',16) }} Save settings</button><button name="act" value="test" class="alt">{{ icon('mail',16) }} Save &amp; send test email</button></div>
+<p class="mut" style="margin-bottom:0"><small>. Keep that file private.</small></p></form>{% endblock %}

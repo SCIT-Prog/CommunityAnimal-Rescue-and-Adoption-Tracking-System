@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block css %}<link rel="stylesheet" href="{{ url_for('static',filename='staff.css') }}">{% endblock %}
+{% block bodyclass %}staff{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{# ---- one list drives the sidebar, the page badges and the breadcrumb ---- #}
+{% set ALL = none %}
+{% set NAV = [
+ ('Workspace', [('dashboard','Dashboard','dashboard',ALL,none), ('queue','Case queues','inbox',('admin','staff','vet'),'queue'), ('case_map','Rescue map','map',ALL,none)]),
+ ('Animals', [('rescues','Rescue reports','alert',ALL,'newrep'), ('animals','Animal profiles','paw',ALL,none), ('followups','Follow-ups','syringe',('admin','staff','vet'),'due')]),
+ ('People & requests', [('applications','Adoptions','heart',('admin','staff'),'pending'), ('adopters','Adopters','users',('admin','staff'),none), ('requests_list','Rehome requests','home',('admin','staff'),'rehome'), ('volunteers','Volunteer / foster','hand',('admin','staff'),'vol'), ('supplies','Wishlist items','list',('admin','staff'),none), ('pledges','Pledges','gift',('admin','staff'),'pledge')]),
+ ('Administration', [('report','Reports & CSV','file',('admin','staff','vet'),none), ('emails','Email log','mail',('admin','staff'),none), ('areas_list','Service areas','map',('admin',),none), ('mail_settings','Email settings','lock',('admin',),none), ('users','Accounts','key',('admin',),none)])
+] %}
+{% set PARENT = {'animal_view':'animals','animal_edit':'animals','animal_new':'animals','rescue_view':'rescues','rescue_new':'rescues','rescue_edit':'rescues','adopter_view':'adopters','email_view':'emails','application_new':'applications','area_new':'areas_list','area_edit':'areas_list'} %}
+{% set cur = namespace(label=none, parent=none) %}
+{% for g, items in NAV %}{% for ep, lab, ico, roles, bk in items %}{% if request.endpoint == ep %}{% set cur.label = lab %}{% endif %}{% if PARENT.get(request.endpoint) == ep %}{% set cur.parent = (ep, lab) %}{% endif %}{% endfor %}{% endfor %}
+{% block main %}
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div class="app" id="app">
+<aside class="sb" id="sb" aria-label="Staff menu">
+  <a class="brand" href="{{ url_for('dashboard') }}" aria-label="Rescue System - dashboard"><span class="logo">{{ icon('paw',22) }}</span><span><b>Rescue System</b><small>Staff console</small></span></a>
+  <div class="who"><span class="who-ic">{{ icon('shield',20) }}</span><span><small>Signed in with</small><b>{{ S.role|capitalize }} access</b></span></div>
+  <nav>
+  {% for g, items in NAV %}{% set vis = [] %}{% for it in items %}{% if it[3] is none or S.role in it[3] %}{% set _ = vis.append(it) %}{% endif %}{% endfor %}
+  {% if vis %}<div class="ng">{{ g }}</div>{% for ep, lab, ico, roles, bk in vis %}{% set cnt = nav.get(bk) if bk else 0 %}
+  <a class="nl {{ 'on' if request.endpoint==ep or (PARENT.get(request.endpoint)==ep) }}" href="{{ url_for(ep) }}"{% if request.endpoint==ep %} aria-current="page"{% endif %}>{{ icon(ico,20) }}<span class="nt">{{ lab }}</span>{% if cnt %}<span class="cnt{{ ' hot' if bk in ('newrep',) }}">{{ cnt }}</span>{% endif %}</a>{% endfor %}{% endif %}{% endfor %}
+  </nav>
+  <div class="sb-foot"><a class="nl" href="{{ url_for('home') }}" target="_blank" rel="noopener">{{ icon('external',20) }}<span class="nt">View public website</span></a></div>
+</aside>
+<div class="sb-shade" id="shade" hidden></div>
+<div class="main-col">
+<header class="tb">
+  <button type="button" class="icon-btn menu-btn" id="menu" aria-label="Open menu" aria-controls="sb" aria-expanded="false">{{ icon('menu',20) }}</button>
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ url_for('dashboard') }}">Rescue System</a><span class="sep">/</span>{% if cur.parent %}<a href="{{ url_for(cur.parent[0]) }}">{{ cur.parent[1] }}</a><span class="sep">/</span>{% endif %}<span aria-current="page">{{ title or cur.label or request.endpoint|replace('_',' ')|capitalize }}</span></nav>
+  <form class="tsearch" method="get" action="{{ url_for('search') }}" role="search">{{ icon('search',18) }}<input id="gs" name="q" type="search" placeholder="Search animals, rescues, people, R-0012…" aria-label="Search everything" autocomplete="off" value="{{ request.args.get('q','') if request.endpoint=='search' else '' }}"><kbd title="Press / to search">/</kbd></form>
+  <div class="tb-actions">
+    {% if S.role in ('admin','staff','vet') %}<div class="notif"><button type="button" class="icon-btn" id="bell" data-feed="{{ url_for('notify_json') }}" aria-haspopup="true" aria-expanded="false" aria-controls="np" aria-label="Notifications{{ ' - ' ~ nav.queue ~ ' waiting' if nav.queue }}" title="Notifications">{{ icon('bell',20) }}<span class="bn" id="bn"{% if not nav.queue %} hidden{% endif %}>{{ nav.queue if nav.queue and nav.queue < 100 else ('99+' if nav.queue else '') }}</span></button>
+      <div class="np" id="np" role="dialog" aria-label="Notifications" hidden><div class="np-h"><b>Notifications</b><a class="btn sm alt" href="{{ url_for('queue') }}">Open case queues</a></div><div class="np-l" id="npl"><p class="np-e">Loading…</p></div></div></div>{% endif %}
+    <button type="button" id="tt" class="icon-btn" data-url="{{ url_for('set_theme') }}" data-csrf="{{ csrf }}" aria-label="Toggle dark mode" title="Dark / light mode">{{ icon('moon',20,'i-moon') }}{{ icon('sun',20,'i-sun') }}</button>
+    <a class="me" href="{{ url_for('profile') }}" title="My profile">{% if S.avatar %}<img class="av" src="{{ url_for('static',filename='uploads/'+S.avatar) }}" alt="">{% else %}<span class="av">{{ (S.name or '?')[:1]|upper }}</span>{% endif %}<span class="me-t"><b>{{ S.name }}</b><small>{{ S.role }}</small></span></a>
+    <form method="post" action="{{ url_for('logout') }}" class="inl"><input type="hidden" name="_csrf" value="{{ csrf }}"><button class="alt sm" title="Sign out">{{ icon('logout',16) }}<span class="hide-s">Log out</span></button></form>
+  </div>
+</header>
+<main id="main" class="content">
+{% with m=get_flashed_messages(with_categories=true) %}<div class="flashes" aria-live="polite">{% for c,t in m %}<div class="flash {{ c if c=='err' }}" role="status">{{ icon('info' if c=='err' else 'check',18) }}<span>{{ t }}</span><button type="button" class="flash-x" aria-label="Dismiss">{{ icon('x',16) }}</button></div>{% endfor %}</div>{% endwith %}
+{% block body %}{% endblock %}
+</main>
+</div></div>
+<script src="{{ url_for('static',filename='staff.js') }}" defer></script>
+{% endblock %}

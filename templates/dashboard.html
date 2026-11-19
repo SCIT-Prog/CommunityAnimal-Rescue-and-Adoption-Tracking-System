@@ -1,0 +1,45 @@
+{% extends 'staff_base.html' %}{% from '_m.html' import pic %}
+{% macro bars(rows) %}{% for r in rows %}<div class="brow"><span>{{ r.label }}</span><div class="bar" role="img" aria-label="{{ r.label }}: {{ r.n }}"><span style="width:{{ r.pct }}%"></span></div><b>{{ r.n }}</b></div>{% else %}<div class="empty">{{ icon('info',18) }} No data yet.</div>{% endfor %}{% endmacro %}
+{% block body %}
+<div class="page-head"><div><div class="eyebrow">Operations overview</div><h1>Dashboard</h1><p class="sub">Welcome back, {{ (S.name or '').split(' ')[0] }}. Here is what is happening across the shelter today.</p></div>
+<div class="head-actions"><a class="btn alt" href="{{ url_for('report') if S.role in ('admin','staff','vet') else url_for('animals') }}">{{ icon('file',18) }} Reports</a><button type="button" class="alt" onclick="window.print()" data-nolock>{{ icon('printer',18) }} Print</button><a class="btn" href="{{ url_for('rescue_new') }}">{{ icon('plus',18) }} New rescue report</a></div></div>
+
+{% set has_attn = st.newrep or (S.role in ('admin','staff') and (st.rehome or st.vol or st.pledge)) or st.mine %}
+{% if has_attn %}<div class="attn-row">
+{% if st.newrep %}<a class="attn red" href="{{ url_for('rescues', cs='new') }}"><span class="ai">{{ icon('alert',22) }}</span><span class="at"><b>{{ st.newrep }} new rescue report{{ 's' if st.newrep!=1 }}</b>Waiting for a rescuer to take the case</span><span class="go">{{ icon('arrow',20) }}</span></a>{% endif %}
+{% if S.role in ('admin','staff') and st.rehome %}<a class="attn amb" href="{{ url_for('requests_list') }}"><span class="ai">{{ icon('home',22) }}</span><span class="at"><b>{{ st.rehome }} rehome request{{ 's' if st.rehome!=1 }}</b>Pet owners asking to give up a pet</span><span class="go">{{ icon('arrow',20) }}</span></a>{% endif %}
+{% if S.role in ('admin','staff') and (st.vol or st.pledge) %}<a class="attn blue" href="{{ url_for('queue') }}"><span class="ai">{{ icon('inbox',22) }}</span><span class="at"><b>{{ st.vol + st.pledge }} request{{ 's' if st.vol+st.pledge!=1 }} in the queue</b>{{ st.vol }} volunteer/foster · {{ st.pledge }} supply pledge{{ 's' if st.pledge!=1 }}</span><span class="go">{{ icon('arrow',20) }}</span></a>{% endif %}
+{% if st.mine %}<a class="attn" href="{{ url_for('queue', mine=1) }}"><span class="ai">{{ icon('target',22) }}</span><span class="at"><b>{{ st.mine }} open case{{ 's' if st.mine!=1 }} are yours</b>Rescue cases you are handling</span><span class="go">{{ icon('arrow',20) }}</span></a>{% endif %}
+</div>{% endif %}
+
+<section class="kpis" aria-label="Key figures">
+<a class="kpi" style="--kc:var(--c4)" href="{{ url_for('rescues') }}"><span class="ki">{{ icon('alert',22) }}</span><span class="kgo">{{ icon('arrow',18) }}</span><div class="kl">Animals rescued (reports)</div><div class="kn">{{ st.rescued }}</div>
+  <div class="kf">{% if this_m > last_m %}<span class="pill up">{{ icon('trend',13) }} +{{ this_m - last_m }}</span>{% elif this_m < last_m %}<span class="pill dn">{{ this_m - last_m }}</span>{% else %}<span class="pill flat">no change</span>{% endif %} {{ this_m }} this month · {{ last_m }} last month</div></a>
+<a class="kpi" style="--kc:var(--c1)" href="{{ url_for('animals', status='under_care') }}"><span class="ki">{{ icon('stethoscope',22) }}</span><span class="kgo">{{ icon('arrow',18) }}</span><div class="kl">Animals under care</div><div class="kn">{{ st.care }}</div><div class="kf">Currently being treated or sheltered</div></a>
+<a class="kpi" style="--kc:var(--c0)" href="{{ url_for('animals', status='available') }}"><span class="ki">{{ icon('paw',22) }}</span><span class="kgo">{{ icon('arrow',18) }}</span><div class="kl">Available for adoption</div><div class="kn">{{ st.avail }}</div><div class="kf">Shown on the public website</div></a>
+<a class="kpi" style="--kc:var(--c2)" href="{{ url_for('applications') if S.role in ('admin','staff') else url_for('animals', status='adopted') }}"><span class="ki">{{ icon('heart',22) }}</span><span class="kgo">{{ icon('arrow',18) }}</span><div class="kl">Completed adoptions</div><div class="kn">{{ st.adopted }}</div><div class="kf">Animals that found a home</div></a>
+{% if S.role in ('admin','staff') %}<a class="kpi" style="--kc:var(--c3)" href="{{ url_for('applications') }}"><span class="ki">{{ icon('clock',22) }}</span><span class="kgo">{{ icon('arrow',18) }}</span><div class="kl">Pending applications</div><div class="kn">{{ st.pending }}</div><div class="kf">{% if st.pending %}<span class="pill dn" style="color:var(--amb);background:var(--ambt)">needs review</span>{% else %}<span class="pill up">all clear</span>{% endif %}</div></a>{% endif %}
+</section>
+
+<section class="split">
+<div class="card"><div class="ch-head"><div><div class="k">Performance</div><h2>Rescues over time</h2><p>New rescue reports per month, last 6 months.</p></div><a class="btn alt sm" href="{{ url_for('rescues') }}">All reports {{ icon('arrow',15) }}</a></div>
+<div class="big-n"><b>{{ trend.total }}</b><span>reports in the last 6 months</span></div>
+<svg class="chart" viewBox="0 0 {{ trend.W }} {{ trend.H }}" role="img" aria-label="Line chart of rescue reports per month"><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--acc)" stop-opacity=".28"/><stop offset="1" stop-color="var(--acc)" stop-opacity="0"/></linearGradient></defs>
+{% for t in trend.ticks %}<line class="grid" x1="{{ trend.L }}" x2="{{ trend.W - trend.R }}" y1="{{ t.y }}" y2="{{ t.y }}"/><text class="axis" x="{{ trend.L - 10 }}" y="{{ t.y + 4 }}" text-anchor="end">{{ t.v }}</text>{% endfor %}
+<path class="area" d="{{ trend.area }}"/><path class="ln" d="{{ trend.d }}"/>
+{% for p in trend.labs %}<g class="hit"><title>{{ p.t }} {{ p.y }}: {{ p.v }} report{{ 's' if p.v!=1 }}</title><circle class="pt" cx="{{ p.x }}" cy="{{ p.py }}" r="5"/><text class="val" x="{{ p.x }}" y="{{ p.py - 12 }}">{{ p.v }}</text><text class="axis" x="{{ p.x }}" y="{{ trend.base + 22 }}" text-anchor="middle">{{ p.t }}</text></g>{% endfor %}</svg></div>
+
+<div class="card"><div class="ch-head"><div><div class="k">Residents</div><h2>Animals by status</h2><p>Where every animal is right now.</p></div></div>
+{% if donut.total %}<div class="donut-wrap"><svg class="donut" viewBox="0 0 100 100" role="img" aria-label="Donut chart of animals by status"><g transform="rotate(-90 50 50)">{% for s in donut.segs %}<circle class="seg s{{ s.k }}" cx="50" cy="50" r="{{ donut.r }}" stroke-dasharray="{{ s.dash }}" stroke-dashoffset="{{ s.off }}"><title>{{ s.label|capitalize }}: {{ s.n }} ({{ s.pct }}%)</title></circle>{% endfor %}</g><text class="tot" x="50" y="53" style="font-size:15px">{{ donut.total }}</text><text class="tl" x="50" y="62">ANIMALS</text></svg></div>
+<div class="legend2">{% for s in donut.segs %}<a class="lg rowlink" href="{{ url_for('animals', status=s.label|replace(' ','_')) }}" style="text-decoration:none;color:inherit"><i class="s{{ s.k }}"></i><span>{{ s.label }}</span><span class="p">{{ s.pct }}%</span><b>{{ s.n }}</b></a>{% endfor %}</div>{% else %}<div class="empty">{{ icon('paw',20) }} No animals yet.</div>{% endif %}</div>
+</section>
+
+<h2>{{ icon('paw',20) }} Newest residents <a class="btn alt sm more" href="{{ url_for('animals') }}">View all {{ icon('arrow',15) }}</a></h2>
+<div class="pets small">{% for p in newest %}<a class="pcard" href="{{ url_for('animal_view',aid=p.id) }}">{{ pic(p.photo, p.species) }}<div class="pbody"><b>{{ p.name }}</b><span class="mut" style="font-size:.8rem;text-transform:capitalize">{{ p.species }}</span><span class="tag t-{{ p.status }}">{{ p.status|replace('_',' ') }}</span></div></a>{% else %}<div class="empty">No animals yet.</div>{% endfor %}</div>
+
+<div class="three" style="margin-top:18px">
+<div class="card"><h2>{{ icon('alert',20) }} Recent rescues <a class="btn alt sm more" href="{{ url_for('rescues') }}">All</a></h2><div class="list">{% for r in recent %}<a class="li" href="{{ url_for('rescue_view',rid=r.id) }}"><span class="li-i">{{ icon('alert',19) }}</span><span class="lt"><b>{{ fref('R', r.id) }} · {{ r.species }}</b><span>{{ r.location }}</span></span>{% if r.case_status=='new' %}<span class="tag t-deceased">new</span>{% endif %}<span class="tag cond-{{ r.animal_condition }}">{{ r.animal_condition }}</span></a>{% else %}<div class="empty">No rescue reports yet.</div>{% endfor %}</div></div>
+<div class="card"><h2>{{ icon('syringe',20) }} Follow-ups due <small class="mut" style="font-weight:500">next 7 days</small></h2><div class="list">{% for f in due %}<a class="li" href="{{ url_for('animal_view',aid=f.animal_id) }}"><span class="li-i">{{ icon('calendar',19) }}</span><span class="lt"><b>{{ f.name }}</b><span>Medical follow-up</span></span><span class="duechip {{ 'late' if f.followup_date|string < today }}">{{ 'Overdue · ' if f.followup_date|string < today }}{{ f.followup_date }}</span></a>{% else %}<div class="empty">{{ icon('check',20) }} Nothing due. Well done.</div>{% endfor %}</div></div>
+<div class="card"><h2>{{ icon('paw',20) }} Animals by species</h2>{{ bars(species) }}</div>
+</div>
+{% endblock %}

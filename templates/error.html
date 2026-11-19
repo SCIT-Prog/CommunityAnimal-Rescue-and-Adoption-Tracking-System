@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block body %}<h1>{{ e.code }} — {{ e.name }}</h1><p>This page does not exist, or you may not have access to it.</p>{% if S.uid %}<a class="btn" href="{{ url_for('dashboard') }}">Back to dashboard</a>{% else %}<a class="btn" href="{{ url_for('home') }}">Back to home</a>{% endif %}{% endblock %}

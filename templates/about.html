@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% block body %}
+<section class="band"><h1>About the Animal Rescue &amp; Adoption System</h1><p>A web-based system that improves how rescue and adoption work is organized in our community.</p></section>
+<div class="card"><h2 style="margin-top:0">Objectives</h2><p><b>General objective:</b> To improve the organization and management of animal rescue and adoption activities within the community.</p><p><b>Specific objectives:</b></p><ul><li>To provide a feature for recording and tracking animal rescue incidents within the community.</li><li>To generate reports about rescued animals, available animals, and completed adoptions.</li><li>To maintain animal medical records, including vaccinations, treatments, and health conditions.</li></ul></div>
+<h2>System features</h2><div class="grid">
+<div class="card"><b>Rescue Incident Module</b><p class="mut">Record animal rescue reports: rescue location (with map pin), date, animal details and condition.</p></div>
+<div class="card"><b>Animal Profile Module</b><p class="mut">Stores each animal's species, breed, age, medical history and current status.</p></div>
+<div class="card"><b>Medical Records Module</b><p class="mut">Staff record examinations, vaccinations, treatments, medications and follow-up appointments.</p></div>
+<div class="card"><b>Adoption Management Module</b><p class="mut">Tracks adoption applications, adopter profiles, application status and completed adoptions.</p></div>
+<div class="card"><b>Dashboard Module</b><p class="mut">Summaries of rescued animals, animals under care, animals available for adoption and completed adoptions.</p></div>
+<div class="card"><b>Report Generator Module</b><p class="mut">Reports by date, location, animal type and status, exportable to CSV.</p></div>
+<div class="card"><b>Account Management Module</b><p class="mut">Administrators create and manage user accounts and access permissions (admin, staff, vet, volunteer).</p></div>
+<div class="card"><b>Also included</b><p class="mut">Found-pet reports, rehoming requests, volunteer &amp; foster applications, supply wishlist &amp; pledges, request tracking, email notices and a rescue map.</p></div></div>
+<h2>Technical components</h2><div class="grid"><div class="card tile"><b>Front end</b><p class="mut">Programming language: Python (web pages built with HTML, CSS and JavaScript templates)</p></div><div class="card tile"><b>Back end</b><p class="mut">Database application: MySQL</p></div><div class="card tile"><b>Budget (if applicable)</b><p class="mut">Proposed budget: <i>to be filled in by the project team</i></p></div></div>
+<div class="card" style="margin-top:12px"><h2 style="margin-top:0">Human resource - knowledge needed</h2><ul><li>Animal rescue and intake process</li><li>Animal adoption procedures</li><li>Animal health and vaccination records</li></ul></div>
+<p class="mut">The system has no online payment and no automatic dispatch: a staff member always reviews and responds to each request.</p>{% endblock %}

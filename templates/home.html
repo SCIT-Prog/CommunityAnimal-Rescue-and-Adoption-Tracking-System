@@ -1,0 +1,35 @@
+{% extends 'base.html' %}{% from '_m.html' import pic %}{% block body %}
+<section class="hbanner" id="hero" role="region" aria-roledescription="carousel" aria-label="Pets waiting for a home">
+<div class="hb-media" aria-live="off">
+<figure class="slide on" aria-roledescription="slide" aria-label="1 of 3"><img src="{{ url_for('static',filename='img/hero1.jpg') }}" alt="Puppies and kittens sitting together"></figure>
+<figure class="slide" aria-roledescription="slide" aria-label="2 of 3"><img src="{{ url_for('static',filename='img/hero2.jpg') }}" alt="Dogs, cats, a hamster, a rabbit and a parrot" loading="lazy"></figure>
+<figure class="slide" aria-roledescription="slide" aria-label="3 of 3"><img src="{{ url_for('static',filename='img/hero3.jpg') }}" alt="A group of dogs, cats, rabbits and birds" loading="lazy"></figure>
+</div>
+<div class="hb-copy"><h1>Every rescued pet deserves a loving home</h1><p>Meet the dogs, cats, rabbits and birds waiting for a family. Browse, choose your new best friend and apply online.</p>
+<div class="hb-actions"><a class="btn" href="{{ url_for('pets_public') }}">{{ icon('paw',18) }} Meet adoptable pets</a> <a class="btn danger" href="{{ url_for('found') }}">{{ icon('alert',18) }} I found a pet</a> <a class="btn alt" href="{{ url_for('rehome') }}">{{ icon('home',18) }} Rehome my pet</a> <a class="btn alt" href="{{ url_for('track') }}">{{ icon('search',18) }} Track my request</a></div></div>
+</section>
+<script>
+(function(){var r=document.getElementById('hero');if(!r)return;
+var s=[].slice.call(r.querySelectorAll('.slide')),i=0,t=null,paused=matchMedia('(prefers-reduced-motion:reduce)').matches,hov=false;
+function go(n,dir){var o=i;i=(n+s.length)%s.length;if(o===i)return;
+ s[o].classList.remove('on');s[o].classList.add(dir<0?'out-r':'out');
+ s[i].classList.remove('out','out-r');s[i].style.transition='none';s[i].classList.add(dir<0?'in-l':'in-r');void s[i].offsetWidth;s[i].style.transition='';s[i].classList.remove('in-l','in-r');s[i].classList.add('on');
+ setTimeout(function(){if(o!==i)s[o].classList.remove('out','out-r')},1000)}
+function tick(){clearInterval(t);t=null;if(!paused&&!hov)t=setInterval(function(){go(i+1,1)},5000)}
+r.addEventListener('mouseenter',function(){hov=true;tick()});r.addEventListener('mouseleave',function(){hov=false;tick()});
+r.addEventListener('focusin',function(){hov=true;tick()});r.addEventListener('focusout',function(){hov=false;tick()});
+r.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'){go(i-1,-1);tick()}if(e.key==='ArrowRight'){go(i+1,1);tick()}});
+var x0=null;r.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+r.addEventListener('touchend',function(e){if(x0===null)return;var dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>40){go(i+(dx<0?1:-1),dx<0?1:-1);tick()}});
+tick()})();
+</script>
+<form class="card row" method="get" action="{{ url_for('pets_public') }}" role="search" style="margin-top:16px"><div style="flex:3"><label for="hq">Find a pet</label><input id="hq" name="q" placeholder="Name, breed or color - e.g. beagle, golden, tabby"></div><div><button>Search pets</button></div></form>
+<div class="grid"><div class="card tile"><span class="big">{{ st.avail }}</span>Pets ready for adoption</div><div class="card tile"><span class="big">{{ st.care }}</span>Animals recovering in our care</div><div class="card tile"><span class="big">{{ st.adopted }}</span>Happy adoptions completed</div></div>
+<h2 id="pets">Adoptable pets</h2><div class="pets">{% for p in pets %}<a class="pcard" href="{{ url_for('pet_public',aid=p.id) }}">{{ pic(p.photo, p.species) }}<div class="pbody"><b>{{ p.name }}</b><span class="mut">{{ p.species }} · {{ p.breed or 'Mixed' }}</span><span class="mut">{{ p.sex }}{% if p.age_years is not none %} · {{ p.age_years }} yr{% endif %}</span></div></a>{% else %}<p>No pets are available right now. Please check back soon.</p>{% endfor %}</div>
+<p><a href="{{ url_for('pets_public') }}">See all adoptable pets with filters →</a></p>
+<h2>How can we help?</h2><div class="grid"><a class="card cta found" href="{{ url_for('found') }}"><span class="ico">{{ icon('camera',26) }}</span><b>Found a stray or hurt pet?</b><span class="mut">Send a photo and drop a pin on the map. Our rescuers see it instantly.</span></a>
+<a class="card cta" href="{{ url_for('rehome') }}"><span class="ico">{{ icon('home',26) }}</span><b>Can't keep your pet?</b><span class="mut">Tell us about your pet and we'll help find a loving new family.</span></a>
+<a class="card cta" href="{{ url_for('volunteer') }}"><span class="ico">{{ icon('hand',26) }}</span><b>Volunteer or foster</b><span class="mut">Give your time or a temporary home to an animal in recovery.</span></a>
+<a class="card cta" href="{{ url_for('wishlist') }}"><span class="ico">{{ icon('gift',26) }}</span><b>Supply wishlist</b><span class="mut">Pledge food, beds or medicine. Items only - no online payment.</span></a></div>
+<h2>What every pet needs</h2><div class="pets small">{% for i in needs %}<a class="pcard" href="{{ url_for('needs') }}"><img class="pic" src="{{ url_for('static',filename='img/needs/'+i.key+'.svg') }}" alt="" loading="lazy"><div class="pbody"><b>{{ i.title }}</b></div></a>{% endfor %}</div><p><a href="{{ url_for('needs') }}">See the full pet needs guide →</a></p>
+<h2>How adoption works</h2><div class="grid"><div class="card"><b>1. Choose</b><p class="mut">Open a pet's page and read their story.</p></div><div class="card"><b>2. Apply</b><p class="mut">Send the short application form online. You get a reference number.</p></div><div class="card"><b>3. Get the email</b><p class="mut">When staff approve, we email you. You can also <a href="{{ url_for('track') }}">track it here</a>.</p></div></div>{% endblock %}

@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% from '_m.html' import fields %}{% block body %}<h1>Pledge: {{ s.name }}</h1><p class="mut">Needed: {{ s.qty_needed }} {{ s.unit }}. {{ s.notes or '' }} No payment is taken here - you bring the item to the center and staff confirm by phone or email.</p>
+<form class="card" method="post"><div class="hp" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div>{{ fields(fs, vals, csrf) }}<button>Send pledge</button> <a class="btn alt" href="{{ url_for('wishlist') }}">Cancel</a></form>{% endblock %}

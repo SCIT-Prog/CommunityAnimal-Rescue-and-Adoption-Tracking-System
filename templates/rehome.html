@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% from '_m.html' import fields %}{% block body %}
+<section class="band"><h1>{{ icon('home',18) }} Need to find a new home for your pet?</h1><p>If you can no longer keep your pet, tell us about them. Our team will review your request and help your pet find a loving family. Add a nice photo so adopters can meet them.</p>{% if svc %}<p class="mut" style="margin:.4em 0 0">{{ icon('map',16) }} We accept requests from these places only: <b>{{ svc }}</b>.</p>{% endif %}</section>
+{% if closed %}<div class="card"><h2 style="margin-top:0">{{ icon('alert',18) }} Online requests are closed right now</h2><p>The rescue center is not taking online requests at the moment. Please contact the center directly.</p><a class="btn alt" href="{{ url_for('home') }}">Back to home</a></div>{% else %}
+<form class="card" method="post" enctype="multipart/form-data"><div class="hp" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div>
+{{ fields(fs, vals, csrf) }}<button>Send rehome request</button> <a class="btn alt" href="{{ url_for('home') }}">Cancel</a></form>{% endif %}{% endblock %}

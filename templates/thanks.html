@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% block body %}<div class="card" style="text-align:center;padding:36px 18px"><div class="okbig">{{ icon('check',40) }}</div><h1>{{ h }}</h1><p>Your reference number: <b style="font-size:1.4rem;letter-spacing:.04em">{{ ref }}</b></p><p class="mut" style="max-width:560px;margin:0 auto 14px">{{ msg }}</p>
+<p class="mut">Keep this number. You can follow your request any time with the same phone number or email you gave us.</p>
+<a class="btn" href="{{ url_for('track', ref=ref) }}">{{ icon('search',18) }} Track this request</a> <a class="btn alt" href="{{ again }}">{{ againl }}</a> <a class="btn alt" href="{{ url_for('home') }}">Home</a></div>{% endblock %}

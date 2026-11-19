@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block body %}
+<section class="band"><h1>{{ icon('list',18) }} What every pet needs</h1><p>The basics of a happy, healthy pet - pick a pet type to see its must-have supplies and care.</p></section>
+<nav class="chips" aria-label="Pet type">{% for k,l in kinds %}<a class="chip {{ 'on' if s==k }}" href="{{ url_for('needs', s=k) if k else url_for('needs') }}">{{ l }}</a>{% endfor %}</nav>
+<div class="needs">{% for i in items %}<article class="ncard"><img src="{{ url_for('static',filename='img/needs/'+i.key+'.svg') }}" alt="Illustration: {{ i.title }}" loading="lazy"><div class="nb"><b>{{ i.title }}</b><p class="mut">{{ i.text }}</p><span>{% for w in i.who %}<span class="tag">{{ w }}</span> {% endfor %}</span></div></article>{% endfor %}</div>
+<div class="card" style="margin-top:14px">Ready to give a pet all this? <a class="btn" href="{{ url_for('pets_public') }}">Meet adoptable pets</a></div>{% endblock %}
